@@ -1,0 +1,39 @@
+dataset:
+  name: imagenet
+  root: ~/datasets/ILSVRC2012
+  train:
+    split: train
+    make_partial: 0.1
+  val:
+    split: val
+  resize: 224
+
+training:
+  optimizer:
+    name: SGD
+    lr: 0.05
+    weight_decay: 5.0e-4
+  lr_schedule:
+    name: cosine_annealing
+    T_max: 240
+  train_epochs: 240
+  print_interval: 20
+  val_interval: 1000
+  batch_size: 64
+  num_workers: 16
+  sync_bn: True
+
+validation:
+  batch_size: 128
+  num_workers: 16
+
+model:
+  # cfg names
+  name: official_models
+  model_name: efficientnet_b2
+
+loss:
+  name: ce_loss
+  weight_dict:
+    cls: 1.0
+

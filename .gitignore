@@ -1,0 +1,12 @@
+*.pyc
+__pycache__
+.vscode
+.DS_Store
+
+run
+backup
+debug
+watch_tb*
+vis/result
+*.out
+output.txt

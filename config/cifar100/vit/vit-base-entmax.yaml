@@ -1,0 +1,53 @@
+dataset:
+  name: cifar_100
+  root: ~/datasets/cifar
+  train:
+    split: train
+  val:
+    split: test
+  resize: 224
+
+training:
+  optimizer:
+    name: AdamW
+    lr: 1.0e-3
+    weight_decay: 0.05
+  lr_schedule:
+    name: cosine_annealing
+    T_max: 240
+  train_epochs: 240
+  print_interval: 20
+  val_interval: 1000
+  batch_size: 64
+  num_workers: 16
+  clip_max_norm: 0.1
+
+validation:
+  batch_size: 128
+  num_workers: 16
+
+model:
+  name: vit
+  transformer:
+    embed_dim: 288
+    num_encoder_layers: 6
+    num_heads: 9
+    dim_feedforward: 1152   # embed_dim * 4
+    dropout: 0.1
+    activation: gelu
+    final_norm: True
+    use_entmax: True
+    learnable_entmax_alpha: True
+  patch_embed:
+    name: vit_like
+    img_size: 224
+    patch_size: 16
+    image_channels: 3
+  pos_encoding:
+    name: learnable
+    dropout: null
+
+loss:
+  name: ce_loss
+  weight_dict:
+    cls: 1.0

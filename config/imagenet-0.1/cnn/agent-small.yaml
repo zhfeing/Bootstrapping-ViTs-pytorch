@@ -1,0 +1,57 @@
+dataset:
+  name: imagenet
+  root: ~/datasets/ILSVRC2012
+  train:
+    split: train
+    make_partial: 0.1
+  val:
+    split: val
+  resize: 224
+
+training:
+  optimizer:
+    name: AdamW
+    lr: 1.0e-3
+    weight_decay: 0.05
+  lr_schedule:
+    name: cosine_annealing
+    T_max: 240
+  train_epochs: 240
+  print_interval: 20
+  val_interval: 1000
+  batch_size: 64
+  num_workers: 16
+  sync_bn: True
+
+validation:
+  batch_size: 128
+  num_workers: 16
+
+model:
+  # cfg names
+  name: cnn
+  cnn_name: cnn_block
+  input_proj:
+    name: vit_like
+    patch_size: 16
+    image_channels: 3
+  conv_block:
+    name: conv_sl
+    bias: True
+  mlp_block:
+    name: mlp_cnn
+    dim_feedforward: 1152
+    dropout: 0.1
+  down_sample_layers: []
+  # transformers info
+  embed_dim: 288
+  num_layers: 6
+  # others
+  norm:
+    name: bn
+  activation: gelu
+
+loss:
+  name: ce_loss
+  weight_dict:
+    cls: 1.0

@@ -1,0 +1,103 @@
+dataset:
+  name: imagenet
+  root: ~/datasets/ILSVRC2012
+  train:
+    split: train
+    make_partial: 0.1
+  val:
+    split: val
+  resize: 224
+
+training:
+  optimizer:
+    name: AdamW
+    lr: 1.0e-3
+    weight_decay: 0.05
+  lr_schedule:
+    name: cosine_annealing
+    T_max: 240
+  train_epochs: 240
+  print_interval: 20
+  val_interval: 1000
+  batch_size: 64
+  num_workers: 16
+  decay_strategy:
+    use_decay: True
+    decay_items:
+      - hint_vit
+
+validation:
+  batch_size: 128
+  num_workers: 16
+
+mutual:
+  cfg:
+    name: joint_model
+    vit:
+      name: vit
+      transformer:
+        embed_dim: 288
+        num_encoder_layers: 6
+        num_heads: 9
+        dim_feedforward: 1152   # embed_dim * 4
+        dropout: 0.1
+        activation: gelu
+        final_norm: True
+        pre_norm: True
+      patch_embed:
+        name: vit_like
+        img_size: 224
+        patch_size: 16
+        image_channels: 3
+      pos_encoding:
+        name: learnable
+        dropout: Null
+    cnn:
+      norm:
+        name: bn
+      down_sample_layers: [0, 1]
+      input_proj:
+        name: resnet_like
+        image_channels: 3
+        activation: gelu
+        mid_channel: 64
+      pre_norm: True
+    joint:
+      clip_max_norm: Null
+    extract_layers_cnn:
+      - layers.0
+      - layers.1
+      - layers.2
+      - layers.3
+      - layers.4
+      - layers.5
+    extract_layers_vit:
+      - transformer.layers.0
+      - transformer.layers.1
+      - transformer.layers.2
+      - transformer.layers.3
+      - transformer.layers.4
+      - transformer.layers.5
+  joint_training: True
+  master: vit
+
+loss:
+  name: joint_mutual_loss
+  weight_dict:
+    cls_cnn: 0.5
+    cls_vit: 0.5
+    kd_cnn: 0.5
+    kd_vit: 0.5
+    hint_cnn: 0
+    hint_vit: 5.0
+  kd_temp: 4.0
+  loss_items:
+    - joint_ce
+    - joint_kd
+    - joint_hint
+  hint_cfg:
+    start_id: 1
+    proj_student: False
+    embed_dim: 288
+    norm: True
+    auto_resample: True

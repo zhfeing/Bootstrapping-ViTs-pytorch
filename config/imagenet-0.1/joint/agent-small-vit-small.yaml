@@ -1,0 +1,67 @@
+dataset:
+  name: imagenet
+  root: ~/datasets/ILSVRC2012
+  train:
+    split: train
+    make_partial: 0.1
+  val:
+    split: val
+  resize: 224
+
+mutual:
+  cfg:
+    name: base_mutual
+    vit:
+      cfg_path: config/cifar100/vit/vit-small.yaml
+      extract_layers:
+        - transformer.layers.0
+        - transformer.layers.1
+        - transformer.layers.2
+        - transformer.layers.3
+        - transformer.layers.4
+        - transformer.layers.5
+    cnn:
+      cfg_path: config/cifar100/cnn/agent-small.yaml
+      extract_layers:
+        - layers.0
+        - layers.1
+        - layers.2
+        - layers.3
+        - layers.4
+        - layers.5
+  joint_training: False
+  master: vit
+
+training:
+  train_epochs: 240
+  print_interval: 20
+  val_interval: 1000
+  batch_size: 64
+  num_workers: 16
+  sync_bn: True
+  decay_strategy:
+    use_decay: True
+    decay_items: [hint_vit,]
+
+validation:
+  batch_size: 128
+  num_workers: 16
+
+loss:
+  name: base_mutual_loss
+  weight_dict:
+    cls: 1.0
+    kd: 1.0
+    hint_cnn: 0
+    hint_vit: 10.0
+  loss_items:
+    - cross_entropy
+    - mutual_kd
+    - mutual_hint
+  kd_temp: 4.0
+  hint_cfg:
+    start_id: 1
+    proj_student: False
+    embed_dim: 288
+    norm: True
+

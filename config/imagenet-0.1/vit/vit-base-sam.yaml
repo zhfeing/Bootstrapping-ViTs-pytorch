@@ -1,0 +1,57 @@
+dataset:
+  name: imagenet
+  root: ~/datasets/ILSVRC2012
+  train:
+    split: train
+    make_partial: 0.1
+  val:
+    split: val
+  resize: 224
+
+training:
+  optimizer:
+    base:
+      name: AdamW
+      lr: 1.0e-3
+      weight_decay: 0.05
+    sam:
+      rho: 0.1
+      adaptive: False
+  lr_schedule:
+    name: cosine_annealing
+    T_max: 240
+  train_epochs: 240
+  print_interval: 20
+  val_interval: 1000
+  batch_size: 64
+  num_workers: 16
+  clip_max_norm: 1.0
+
+validation:
+  batch_size: 128
+  num_workers: 16
+
+model:
+  name: vit
+  transformer:
+    embed_dim: 384
+    num_encoder_layers: 12
+    num_heads: 6
+    dim_feedforward: 1536
+    dropout: Null
+    activation: gelu
+    final_norm: True
+    norm_eps: 1.0e-6
+  patch_embed:
+    name: vit_like
+    img_size: 224
+    patch_size: 16
+    image_channels: 3
+  pos_encoding:
+    name: learnable
+    dropout: Null
+
+loss:
+  name: ce_loss
+  weight_dict:
+    cls: 1.0
